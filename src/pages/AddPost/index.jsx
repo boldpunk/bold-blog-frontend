@@ -62,7 +62,7 @@ export const AddPost = () => {
 
       const _id = isEditing ? id : data._id;
 
-      navigate(`/posts/${_id}`);
+      navigate(`/posts/${id}`);
     } catch (err) {
       console.warn(err);
       alert('Ошибка при создании статьи!');

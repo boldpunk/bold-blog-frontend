@@ -1,15 +1,14 @@
 import React from 'react';
+import { useNavigate, Navigate, useParams } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 import TextField from '@mui/material/TextField';
 import Paper from '@mui/material/Paper';
 import Button from '@mui/material/Button';
 import SimpleMDE from 'react-simplemde-editor';
 
-import { useSelector } from 'react-redux';
-import { useNavigate, Navigate, useParams } from 'react-router-dom';
-import { selectIsAuth } from '../../redux/slices/auth';
-
-import axios from '../../axios';
 import 'easymde/dist/easymde.min.css';
+import { selectIsAuth } from '../../redux/slices/auth';
+import axios from '../../axios';
 import styles from './AddPost.module.scss';
 
 export const AddPost = () => {
@@ -17,7 +16,6 @@ export const AddPost = () => {
   const navigate = useNavigate();
   const isAuth = useSelector(selectIsAuth);
   const [isLoading, setLoading] = React.useState(false);
-
   const [text, setText] = React.useState('');
   const [title, setTitle] = React.useState('');
   const [tags, setTags] = React.useState('');
@@ -25,6 +23,7 @@ export const AddPost = () => {
   const inputFileRef = React.useRef(null);
 
   const isEditing = Boolean(id);
+
   const handleChangeFile = async (event) => {
     try {
       const formData = new FormData();
@@ -34,11 +33,11 @@ export const AddPost = () => {
       setImageUrl(data.url);
     } catch (err) {
       console.warn(err);
-      alert('Ошибка при загрузке изображения!');
+      alert('Ошибка при загрузке файла!');
     }
   };
 
-  const onClickRemoveImage = async (event) => {
+  const onClickRemoveImage = () => {
     setImageUrl('');
   };
 
@@ -53,16 +52,17 @@ export const AddPost = () => {
       const fields = {
         title,
         imageUrl,
-        text,
         tags,
+        text,
       };
+
       const { data } = isEditing
         ? await axios.patch(`/posts/${id}`, fields)
         : await axios.post('/posts', fields);
 
       const _id = isEditing ? id : data._id;
 
-      navigate(`/posts/${id}`);
+      navigate(`/posts/${_id}`);
     } catch (err) {
       console.warn(err);
       alert('Ошибка при создании статьи!');
@@ -81,10 +81,11 @@ export const AddPost = () => {
         })
         .catch((err) => {
           console.warn(err);
-          alert('oshibka pri poluchenie statio');
+          alert('Ошибка при получении статьи!');
         });
     }
   }, []);
+
   const options = React.useMemo(
     () => ({
       spellChecker: false,
@@ -104,7 +105,6 @@ export const AddPost = () => {
     return <Navigate to="/" />;
   }
 
-  console.log({ title, tags, text });
   return (
     <Paper style={{ padding: 30 }}>
       <Button onClick={() => inputFileRef.current.click()} variant="outlined" size="large">
@@ -116,7 +116,6 @@ export const AddPost = () => {
           <Button variant="contained" color="error" onClick={onClickRemoveImage}>
             Удалить
           </Button>
-
           <img
             className={styles.image}
             src={`${process.env.REACT_APP_API_URL}${imageUrl}`}
@@ -124,15 +123,14 @@ export const AddPost = () => {
           />
         </>
       )}
-
       <br />
       <br />
       <TextField
+        value={fields.title}
+        onChange={(e) => setFieldValue('title', e.target.value)}
         classes={{ root: styles.title }}
         variant="standard"
         placeholder="Заголовок статьи..."
-        value={title}
-        onChange={(e) => setTitle(e.target.value)}
         fullWidth
       />
       <TextField
